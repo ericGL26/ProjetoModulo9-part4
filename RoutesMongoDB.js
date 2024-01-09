@@ -1,7 +1,9 @@
-const ObterDadosMongoDB = require('./Mongodb');
+const Joi = require('joi');
 
 async function CriarRotasMongoDB() {
+  const ObterDadosMongoDB = require('./Mongodb');
   const DadosMongoDB = await ObterDadosMongoDB();
+
   return [
     {
       method: 'GET',
@@ -25,9 +27,29 @@ async function CriarRotasMongoDB() {
     {
       method: 'POST',
       path: '/AdicionarUsuario',
-      handler: (request, h) => {
-        const NovoUsuario = request.payload; 
-        return h.response({ mensagem: 'Usuário adicionado com sucesso!' }).code(201);
+      options: {
+        validate: {
+          payload: Joi.object({
+            nome: Joi.string().required(),
+            poder: Joi.string().required()
+          })
+        }
+      },
+      handler: async (request, h) => {
+        console.log('OLAD')
+        const db = request.mongo.db;
+        const collection = db.collection('usuarios');
+        try {
+          const novoUsuario = {
+            nome: request.payload.nome,
+            poder: request.payload.poder
+          };
+          const resultado = await collection.insertOne(novoUsuario);
+
+          return h.response({ statusCode: 201, mensagem: 'Usuário adicionado com sucesso', id: resultado.insertedId }).code(201);
+        } catch (error) {
+          console.log('error depois do statuscode201')
+        }
       },
     },
   ];

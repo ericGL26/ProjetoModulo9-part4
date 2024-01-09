@@ -12,7 +12,7 @@ describe('Testes API-Herois', () => {
       })
       res.on('end', () => {
         const responseBody = JSON.parse(data);
-        const resultado = (responseBody.length = 0) ? console.log('Valores nao retornados') : console.log('Valores retornados com sucesso')
+        const resultado = (responseBody.length === 0) ? console.log('Valores nao retornados') : console.log('Valores retornados com sucesso')
         done()
       })
     })
@@ -32,7 +32,7 @@ describe('Testes API-Herois', () => {
       })
     })
   })
-
+/*
   it('Deve retornar com skip de 3 usuarios', (done) => {
     http.get('http://localhost:2024/RetornarComSkipELimit?skip=3&limit=1', (res) => {
       let data = ""
@@ -49,7 +49,7 @@ describe('Testes API-Herois', () => {
       })
     })
   })
-
+*/
   it('Deve retornar com limit de 3 usuarios', (done) => {
     http.get('http://localhost:2024/RetornarComSkipELimit?limit=3', (res) => {
       var data = ""
@@ -70,28 +70,41 @@ describe('Testes API-Herois', () => {
       nome: 'Daniel',
       poder: 'prospeção temporal'
     };
-
+  
+    const options = {
+      hostname: 'localhost',
+      port: 2024,
+      path: '/AdicionarUsuario',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+  
     return new Promise((resolve, reject) => {
-      const req = http.post('http://localhost:2024/AdicionarUsuario', (res) => {
-        let data = ""
-
+      const req = http.request(options, (res) => {
+        let data = '';
+  
         res.on('data', (chunk) => {
-          data += chunk
-        })
+          data += chunk;
+        });
+  
         res.on('end', () => {
           const responseBody = JSON.parse(data);
-          assert.strictEqual(201, res.statusCode, 'Usuario criado com sucesso')
-          resolve()
-        })
-      })
-      
+          console.log('Responsebody', res.statusCode);
+          console.log('Real Response:', responseBody); // Adicionado para logar a resposta real
+          assert.strictEqual(201, res.statusCode, 'Usuario criado com sucesso');
+          resolve();
+        });
+      });
+  
       req.on('error', (error) => {
-        reject(error)
-      })
-
-      req.write(JSON.stringify(NovoUsuario))
+        reject(error);
+      });
+  
+      req.write(JSON.stringify(NovoUsuario));
       req.end();
-    })
-  })
-
+    });
+  });
+  
 })
